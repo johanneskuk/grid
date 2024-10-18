@@ -1,5 +1,6 @@
 import random
 import numpy as np
+from tqdm import tqdm
 
 
 class GridFiller:
@@ -44,7 +45,7 @@ class GridFiller:
 
         return True
 
-    def is_valid(self, current_row, current_col, next_row, next_col):
+    def is_valid_in_between_empty(self, current_row, current_col, next_row, next_col):
         """
         Check if the move from the current cell (current_row, current_col) to the next cell (next_row, next_col)
         respects the constraints:
@@ -77,6 +78,39 @@ class GridFiller:
             return False
 
         return True  # The move is valid
+
+    def is_valid(self, current_row, current_col, next_row, next_col):
+        """
+        Check if the move from the current cell (current_row, current_col) to the next cell (next_row, next_col)
+        respects the constraints:
+        - The cells 3 cells away horizontally/vertically or 2 cells diagonally must not be filled.
+        - We ignore whether the cells between the current and next cell are filled or not.
+        """
+        if self.grid[next_row][next_col] != 0:
+            return False  # The target cell is already filled
+
+        # Check if the move is horizontal
+        if current_row == next_row:  # Horizontal move
+            if abs(current_col - next_col) == 3:  # Move 3 cells horizontally
+                # Check if the 3rd cell in the direction is not filled
+                return self.grid[current_row][next_col] == 0
+            else:
+                return False
+
+        # Check if the move is vertical
+        elif current_col == next_col:  # Vertical move
+            if abs(current_row - next_row) == 3:  # Move 3 cells vertically
+                # Check if the 3rd cell in the direction is not filled
+                return self.grid[next_row][current_col] == 0
+            else:
+                return False
+
+        # Check if the move is diagonal
+        elif abs(current_row - next_row) == 2 and abs(current_col - next_col) == 2:  # Diagonal move by 2 cells
+            # Check if the 2nd cell in the diagonal direction is not filled
+            return self.grid[next_row][next_col] == 0
+
+        return False  # If none of the conditions are met, the move is not valid
 
     def find_next_adjacent_cell(self, row, col):
         """
@@ -263,4 +297,36 @@ class GridFiller:
             print("Invalid method. Please choose 'greedy' or 'best_move'.")
 
         # After running the algorithm, print the final grid
+        self.print_grid()
+
+    def reset_grid(self):
+        """
+        Reset the grid and current number for a new attempt.
+        """
+        self.grid = [[0 for _ in range(self.grid_size)] for _ in range(self.grid_size)]
+        self.current_number = 1
+
+    def run_brute_force(self, tries=1):
+        """
+        Run the brute-force approach using the greedy_random method multiple times.
+        Keep track of the best solution (the most cells filled) across multiple attempts.
+
+        Parameters:
+        tries (int): Number of times to attempt the greedy_random approach.
+        """
+        max_filled = 0
+        best_grid = None
+        for i in tqdm(range(tries)):
+            self.reset_grid()  # Reset the grid for each new attempt
+            self.fill_grid_random_greedy()  # Try to fill the grid using the greedy random approach
+
+            # Check if this run filled more cells than the previous best attempt
+            filled_cells = self.current_number - 1  # Subtract 1 because current_number starts from 1
+            if filled_cells > max_filled:
+                max_filled = filled_cells
+                best_grid = [row[:] for row in self.grid]  # Make a copy of the grid
+
+        # Print the results of the best run
+        print(f"Best run filled {max_filled} cells.")
+        self.grid = best_grid  # Set the grid to the best grid for visualization
         self.print_grid()
