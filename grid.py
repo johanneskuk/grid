@@ -331,6 +331,8 @@ class GridFiller:
             if filled_cells > max_filled:
                 max_filled = filled_cells
                 best_grid = [row[:] for row in self.grid]  # Make a copy of the grid
+            if max_filled == self.grid_size*self.grid_size:
+                break
 
         # Print the results of the best run
         print(f"Best run filled {max_filled} cells.")
