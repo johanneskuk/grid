@@ -237,11 +237,17 @@ class GridFiller:
 
         return True
 
-    def fill_grid_random_greedy(self, row=0, col=0):
+    def fill_grid_random_greedy(self, row=None, col=None):
         """
         Recursively fill the grid by randomly selecting one of the valid next cells.
-        This is a random greedy approach.
+        This is a random greedy approach, and it starts from a random cell if no row/col is provided.
         """
+        # If row and col are not provided, select a random starting point
+        if row is None or col is None:
+            row, col = random.randint(0, self.grid_size - 1), random.randint(0, self.grid_size - 1)
+            while self.grid[row][col] != 0:  # Ensure the starting cell is empty
+                row, col = random.randint(0, self.grid_size - 1), random.randint(0, self.grid_size - 1)
+
         # Fill the current cell
         self.grid[row][col] = self.current_number
         self.current_number += 1
@@ -330,3 +336,14 @@ class GridFiller:
         print(f"Best run filled {max_filled} cells.")
         self.grid = best_grid  # Set the grid to the best grid for visualization
         self.print_grid()
+
+
+if __name__ == "__main__":
+    # Get the number of brute-force tries from the user via console input
+    tries = int(input("Enter the number of brute force attempts (tries): "))
+
+    # Create an instance of GridFiller
+    grid_filler = GridFiller(grid_size=10)
+
+    # Run the brute force method with the specified number of tries
+    grid_filler.run_brute_force(tries=tries)
